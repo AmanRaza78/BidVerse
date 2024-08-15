@@ -25,4 +25,20 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  auctionItem AuctionItem[]
+}
+
+model AuctionItem {
+  id String @id @default(uuid())
+  name String
+  description String
+  files String[]
+  currentbid Float @default(0)
+  staringbid Float @default(0)
+  bidinterval Float @default(100)
+
+  enddate DateTime
+
+  userId String?
+  user User? @relation(fields: [userId], references: [id])
 }
