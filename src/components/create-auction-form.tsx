@@ -1,17 +1,32 @@
 "use client";
-import { useState } from "react";
-import { CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { useEffect, useState } from "react";
+import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { DatePicker } from "./date-picker";
 import { Textarea } from "./ui/textarea";
 import { UploadDropzone } from "@/utils/uploadthing";
+import { CreateItemAction, type State } from "@/app/action";
+import { useFormState } from "react-dom";
+import { toast } from "sonner";
+import SubmitButton from "./submit-button";
 
 export default function CreateAuctionForm() {
-  const [date, setDate] = useState<Date | undefined>();
+  const initialState: State = { message: "", status: undefined };
+  const [state, formAction] = useFormState(CreateItemAction, initialState);
+  const [endDate, setEndDate] = useState<Date | undefined>();
   const [files, setFiles] = useState<null | string[]>(null);
+
+  useEffect(() => {
+    if (state.status === "success") {
+      toast.success(state.message);
+    } else if (state.status === "error") {
+      toast.error(state.message);
+    }
+  }, [state]);
+
   return (
-    <form action="">
+    <form action={formAction}>
       <CardHeader>
         <CardTitle>
           Create Your Auction with{" "}
@@ -32,6 +47,9 @@ export default function CreateAuctionForm() {
             required
             minLength={3}
           />
+          {state?.errors?.["name"]?.[0] && (
+            <p className="text-destructive">{state?.errors?.["name"]?.[0]}</p>
+          )}
         </div>
 
         <div className="flex flex-col gap-y-2">
@@ -43,6 +61,11 @@ export default function CreateAuctionForm() {
             required
             minLength={10}
           />
+          {state?.errors?.["description"]?.[0] && (
+            <p className="text-destructive">
+              {state?.errors?.["description"]?.[0]}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-y-2">
@@ -55,11 +78,26 @@ export default function CreateAuctionForm() {
             required
             minLength={1}
           />
+          {state?.errors?.["startingbid"]?.[0] && (
+            <p className="text-destructive">
+              {state?.errors?.["startingbid"]?.[0]}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-y-2">
+          <input
+            type="hidden"
+            name="enddate"
+            value={endDate ? endDate.toISOString() : ""}
+          />
           <Label htmlFor="enddate">Auction End-Date</Label>
-          <DatePicker date={date} setDate={setDate} />
+          <DatePicker endDate={endDate} setEndDate={setEndDate} />
+          {state?.errors?.["enddate"]?.[0] && (
+            <p className="text-destructive">
+              {state?.errors?.["enddate"]?.[0]}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-y-2">
@@ -69,13 +107,20 @@ export default function CreateAuctionForm() {
             endpoint="imageUploader"
             onClientUploadComplete={(res) => {
               setFiles(res.map((item) => item.url));
+              toast.success("Your images have been uploaded");
             }}
             onUploadError={(error: Error) => {
-              alert("Something went wrong");
+              toast.error("Something went wrong, try again");
             }}
           />
+          {state?.errors?.["files"]?.[0] && (
+            <p className="text-destructive">{state?.errors?.["files"]?.[0]}</p>
+          )}
         </div>
       </CardContent>
+      <CardFooter>
+        <SubmitButton title="Create Auction"/>
+      </CardFooter>
     </form>
   );
 }
