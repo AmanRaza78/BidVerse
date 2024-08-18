@@ -1,8 +1,28 @@
+import BidCard from "@/components/bid-card";
+import prisma from "@/lib/db";
 import Image from "next/image";
 import Link from "next/link";
 import { JSX, SVGProps } from "react";
 
-export default function Home() {
+async function getData(){
+  const data = await prisma.auctionItem.findMany({
+    select:{
+      id: true,
+      name: true,
+      currentbid: true,
+      files: true,
+    },
+    take: 6,
+    //todo do prisma db push and then set createdAt to desc in order to order bid latest to oldest.
+    // orderBy:{
+
+    // }
+  })
+  return data
+}
+
+export default async function  Home() {
+  const data = await getData()
   return (
     <div className="flex flex-col min-h-[100dvh]">
       <main className="flex-1">
@@ -53,8 +73,8 @@ export default function Home() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">
-                  Featured Auctions
+                <div className="inline-block rounded-lg bg-muted px-3 py-1 text-lg">
+                  Latest Auctions
                 </div>
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
                   Explore Our Curated Collection
@@ -66,98 +86,11 @@ export default function Home() {
               </div>
             </div>
             <div className="mx-auto grid max-w-5xl items-start gap-6 py-12 sm:grid-cols-2 md:grid-cols-3 lg:gap-12">
-              <div className="group grid gap-2">
-                <img
-                  src="/placeholder.svg"
-                  alt="Auction Item"
-                  className="mx-auto aspect-[4/3] overflow-hidden rounded-xl object-cover object-center transition-all group-hover:scale-105"
-                  width="400"
-                  height="300"
-                />
-                <div className="space-y-1">
-                  <h3 className="text-lg font-bold">Antique Pocket Watch</h3>
-                  <p className="text-muted-foreground">
-                    Current Bid: <span className="font-semibold">$1,250</span>
-                  </p>
-                </div>
-              </div>
-              <div className="group grid gap-2">
-                <img
-                  src="/placeholder.svg"
-                  alt="Auction Item"
-                  className="mx-auto aspect-[4/3] overflow-hidden rounded-xl object-cover object-center transition-all group-hover:scale-105"
-                  width="400"
-                  height="300"
-                />
-                <div className="space-y-1">
-                  <h3 className="text-lg font-bold">Vintage Typewriter</h3>
-                  <p className="text-muted-foreground">
-                    Current Bid: <span className="font-semibold">$850</span>
-                  </p>
-                </div>
-              </div>
-              <div className="group grid gap-2">
-                <img
-                  src="/placeholder.svg"
-                  alt="Auction Item"
-                  className="mx-auto aspect-[4/3] overflow-hidden rounded-xl object-cover object-center transition-all group-hover:scale-105"
-                  width="400"
-                  height="300"
-                />
-                <div className="space-y-1">
-                  <h3 className="text-lg font-bold">Vintage Vinyl Records</h3>
-                  <p className="text-muted-foreground">
-                    Current Bid: <span className="font-semibold">$475</span>
-                  </p>
-                </div>
-              </div>
-              <div className="group grid gap-2">
-                <img
-                  src="/placeholder.svg"
-                  alt="Auction Item"
-                  className="mx-auto aspect-[4/3] overflow-hidden rounded-xl object-cover object-center transition-all group-hover:scale-105"
-                  width="400"
-                  height="300"
-                />
-                <div className="space-y-1">
-                  <h3 className="text-lg font-bold">Antique Porcelain Vase</h3>
-                  <p className="text-muted-foreground">
-                    Current Bid: <span className="font-semibold">$1,800</span>
-                  </p>
-                </div>
-              </div>
-              <div className="group grid gap-2">
-                <img
-                  src="/placeholder.svg"
-                  alt="Auction Item"
-                  className="mx-auto aspect-[4/3] overflow-hidden rounded-xl object-cover object-center transition-all group-hover:scale-105"
-                  width="400"
-                  height="300"
-                />
-                <div className="space-y-1">
-                  <h3 className="text-lg font-bold">
-                    Vintage Leather Suitcase
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Current Bid: <span className="font-semibold">$325</span>
-                  </p>
-                </div>
-              </div>
-              <div className="group grid gap-2">
-                <img
-                  src="/placeholder.svg"
-                  alt="Auction Item"
-                  className="mx-auto aspect-[4/3] overflow-hidden rounded-xl object-cover object-center transition-all group-hover:scale-105"
-                  width="400"
-                  height="300"
-                />
-                <div className="space-y-1">
-                  <h3 className="text-lg font-bold">Antique Pocket Watch</h3>
-                  <p className="text-muted-foreground">
-                    Current Bid: <span className="font-semibold">$1,250</span>
-                  </p>
-                </div>
-              </div>
+              {
+                data.map((item,index)=>(
+                  <BidCard key={index} name={item.name} currentbid={item.currentbid} id={item.id} files={item.files}/>
+                ))
+              }
             </div>
           </div>
         </section>

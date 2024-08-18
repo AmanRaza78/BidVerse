@@ -10,35 +10,54 @@ generator client {
 
 // prisma/schema.prisma
 datasource db {
-  provider  = "postgresql"
-  url  	    = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
   // uncomment next line if you use Prisma <5.10
   // directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 model User {
-  id String @id
-  firstname String
-  lastname String?
-  email String
+  id             String  @id
+  firstname      String
+  lastname       String?
+  email          String
   profilepicture String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
   auctionItem AuctionItem[]
+  bids        Bids[]
 }
 
 model AuctionItem {
-  id String @id @default(uuid())
-  name String
+  id          String   @id @default(uuid())
+  name        String
   description String
-  files String[]
-  currentbid Float @default(0)
-  staringbid Float @default(0)
-  bidinterval Float @default(100)
+  files       String[]
+  currentbid  Float    @default(0)
+  staringbid  Float    @default(0)
+  bidinterval Float    @default(100)
 
   enddate DateTime
 
   userId String?
-  user User? @relation(fields: [userId], references: [id])
+  user   User?   @relation(fields: [userId], references: [id])
+
+  bids Bids[]
+
+  createdAt DateTime @default(now())
+}
+
+model Bids {
+  id     String @id @default(uuid())
+  amount Float
+
+  auctionItemId String?
+  auctionItem   AuctionItem? @relation(fields: [auctionItemId], references: [id])
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
