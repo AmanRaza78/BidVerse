@@ -1,3 +1,5 @@
+import { CreateBid } from "@/app/action";
+import SubmitButton from "@/components/submit-button";
 import { Button } from "@/components/ui/button";
 import {
   Carousel,
@@ -7,8 +9,12 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import prisma from "@/lib/db";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { isBidOver } from "@/utils/bids";
+import { Badge } from "@/components/ui/badge";
 
 async function getData(itemId: string) {
   const data = await prisma.auctionItem.findUnique({
@@ -24,10 +30,37 @@ async function getData(itemId: string) {
       staringbid: true,
       enddate: true,
       bidinterval: true,
+      userId: true,
+      createdAt: true,
     },
   });
 
   return data;
+}
+
+async function getBidData(itemId: string) {
+  const bidData = await prisma.bids.findMany({
+    where: {
+      auctionItemId: itemId,
+    },
+
+    select: {
+      amount: true,
+      createdAt: true,
+      user: {
+        select: {
+          profilepicture: true,
+          firstname: true,
+        },
+      },
+    },
+
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return bidData;
 }
 
 export default async function ItemDetailPage({
@@ -55,6 +88,22 @@ export default async function ItemDetailPage({
       </div>
     );
   }
+
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+
+  if (!user) {
+    return redirect("/api/auth/login");
+  }
+
+  const bidData = await getBidData(data.id);
+
+  const hasBid = bidData.length > 0;
+
+  const canPlaceBid = data.userId !== user.id && !isBidOver(data);
+
+  // console.log(isBidOver(data), "hey aman data is here")
+
   return (
     <section className="mx-auto px-4 lg:mt-10 max-w-7xl lg:px-8 lg:grid lg:grid-rows-1 lg:grid-cols-7 lg:gap-x-8 lg:gap-y-10 xl:gap-x-16">
       <Carousel className="lg:row-end-1 lg:col-span-4">
@@ -77,6 +126,11 @@ export default async function ItemDetailPage({
       </Carousel>
 
       <div className="max-w-2xl mx-auto mt-5 lg:max-w-none lg:mt-0 lg:row-end-2 lg:row-span-2 lg:col-span-3">
+        {isBidOver(data) && (
+          <Badge className="w-fit" variant="destructive">
+            Bidding Over
+          </Badge>
+        )}
         <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
           {data?.name}
         </h1>
@@ -117,16 +171,42 @@ export default async function ItemDetailPage({
               {data?.bidinterval}
             </h3>
 
-            <form action="">
-              <input type="hidden" name="id" value={data?.id} />
-              <Button>Place a Bid</Button>
-            </form>
-
+            {canPlaceBid && (
+              <form action={CreateBid}>
+                <input type="hidden" name="itemId" value={data?.id} />
+                <SubmitButton title="Place a bid" />
+              </form>
+            )}
           </div>
         </div>
       </div>
 
-      
+      <div className="w-full max-w-2xl mx-auto mt-16 lg:max-w-none lg:mt-0 lg:col-span-4 overflow-auto">
+        {hasBid ? (
+          <ul className="space-y-4">
+            {bidData.map((bid, index) => (
+              <li key={index} className="bg-gray-100 rounded-xl p-8">
+                <div className="flex gap-4">
+                  <div>
+                    <span>Rs.{bid.amount}</span> by{" "}
+                    <span className="font-bold">Mr.{bid.user?.firstname}</span>
+                  </div>
+                  <div>
+                    {new Intl.DateTimeFormat("en-US", {
+                      dateStyle: "long",
+                    }).format(bid.createdAt)}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="flex flex-col items-center gap-8 bg-gray-100 rounded-xl p-12">
+            <Image src="/package.svg" width="200" height="200" alt="Package" />
+            <h2 className="text-2xl font-bold">No bids yet</h2>
+          </div>
+        )}
+      </div>
     </section>
   );
 }

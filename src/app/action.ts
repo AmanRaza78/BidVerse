@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
+import { revalidatePath } from "next/cache";
 
 export type State = {
   status: "success" | "error" | undefined;
@@ -63,4 +64,46 @@ export async function CreateItemAction(prevState: any, formData: FormData) {
   });
 
   return redirect(`/auction/item/${data.id}`);
+}
+
+export async function CreateBid(formData:FormData){
+  const {getUser} = getKindeServerSession()
+  const user = await getUser()
+
+  if(!user){
+    return redirect("/api/auth/login")
+  }
+
+  const itemId = formData.get("itemId") as string
+
+  const auctionData = await prisma.auctionItem.findFirst({
+    where:{
+      id: itemId
+    }
+  })
+
+  if(!auctionData){
+    throw new Error("Auction Item is not found")
+  }
+  
+  const latestBidValue = auctionData?.currentbid + auctionData?.bidinterval
+
+  await prisma.bids.create({
+    data:{
+      amount: latestBidValue,
+      auctionItemId: itemId,
+      userId: user.id
+    }
+  })
+
+  await prisma.auctionItem.update({
+    where:{
+      id: itemId
+    },
+    data:{
+      currentbid: latestBidValue
+    }
+  })
+
+  revalidatePath(`/auction/item/${itemId}`)
 }
