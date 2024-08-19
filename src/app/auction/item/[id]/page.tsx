@@ -1,4 +1,4 @@
-import { CreateBid } from "@/app/action";
+import { CreateBid, getBidData, getData } from "@/app/action";
 import SubmitButton from "@/components/submit-button";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,7 +8,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import prisma from "@/lib/db";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,52 +15,6 @@ import { redirect } from "next/navigation";
 import { isBidOver } from "@/utils/bids";
 import { Badge } from "@/components/ui/badge";
 
-async function getData(itemId: string) {
-  const data = await prisma.auctionItem.findUnique({
-    where: {
-      id: itemId,
-    },
-    select: {
-      id: true,
-      name: true,
-      description: true,
-      files: true,
-      currentbid: true,
-      staringbid: true,
-      enddate: true,
-      bidinterval: true,
-      userId: true,
-      createdAt: true,
-    },
-  });
-
-  return data;
-}
-
-async function getBidData(itemId: string) {
-  const bidData = await prisma.bids.findMany({
-    where: {
-      auctionItemId: itemId,
-    },
-
-    select: {
-      amount: true,
-      createdAt: true,
-      user: {
-        select: {
-          profilepicture: true,
-          firstname: true,
-        },
-      },
-    },
-
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
-  return bidData;
-}
 
 export default async function ItemDetailPage({
   params,

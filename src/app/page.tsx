@@ -13,10 +13,9 @@ async function getData(){
       files: true,
     },
     take: 6,
-    //todo do prisma db push and then set createdAt to desc in order to order bid latest to oldest.
-    // orderBy:{
-
-    // }
+    orderBy:{
+      createdAt: 'desc'
+    }
   })
   return data
 }

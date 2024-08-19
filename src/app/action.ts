@@ -107,3 +107,51 @@ export async function CreateBid(formData:FormData){
 
   revalidatePath(`/auction/item/${itemId}`)
 }
+
+
+export async function getData(itemId: string) {
+  const data = await prisma.auctionItem.findUnique({
+    where: {
+      id: itemId,
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      files: true,
+      currentbid: true,
+      staringbid: true,
+      enddate: true,
+      bidinterval: true,
+      userId: true,
+      createdAt: true,
+    },
+  });
+
+  return data;
+}
+
+export async function getBidData(itemId: string) {
+  const bidData = await prisma.bids.findMany({
+    where: {
+      auctionItemId: itemId,
+    },
+
+    select: {
+      amount: true,
+      createdAt: true,
+      user: {
+        select: {
+          profilepicture: true,
+          firstname: true,
+        },
+      },
+    },
+
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return bidData;
+}

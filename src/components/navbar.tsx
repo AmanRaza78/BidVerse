@@ -13,7 +13,7 @@ export default async function Navbar() {
   return (
     <header className="px-4 lg:px-6 h-14 flex items-center border-b-2 shadow-md">
       <Link
-        href="#"
+        href="/"
         className="flex items-center justify-center"
         prefetch={false}
       >
@@ -22,14 +22,14 @@ export default async function Navbar() {
       </Link>
       <nav className="ml-auto flex gap-4 sm:gap-6 items-center">
         <Link
-          href="#"
+          href="/items"
           className="text-sm font-medium hover:underline underline-offset-4"
           prefetch={false}
         >
           All Auctions
         </Link>
         <Link
-          href="#"
+          href="/auction/create"
           className="text-sm font-medium hover:underline underline-offset-4"
           prefetch={false}
         >
