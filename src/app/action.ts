@@ -13,6 +13,8 @@ export type State = {
   message?: string | null;
 };
 
+
+// Schema for the auction Items
 const ItemSchema = z.object({
   name: z
     .string()
@@ -27,6 +29,7 @@ const ItemSchema = z.object({
     .min(1, { message: "At least one image is required" }),
 });
 
+// Shema for the user profile
 const updateProfileSchema = z.object({
   firstname: z
     .string()
@@ -41,6 +44,7 @@ const updateProfileSchema = z.object({
     .optional(),
 });
 
+// Server Action which creates the Auction Item
 export async function CreateItemAction(prevState: any, formData: FormData) {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
@@ -80,6 +84,7 @@ export async function CreateItemAction(prevState: any, formData: FormData) {
   return redirect(`/auction/item/${data.id}`);
 }
 
+// Server Action which create the bid
 export async function CreateBid(formData:FormData){
   const {getUser} = getKindeServerSession()
   const user = await getUser()
@@ -122,7 +127,7 @@ export async function CreateBid(formData:FormData){
   revalidatePath(`/auction/item/${itemId}`)
 }
 
-
+// Server Action to get auction Item Data for a specific itemId
 export async function getData(itemId: string) {
   const data = await prisma.auctionItem.findUnique({
     where: {
@@ -145,6 +150,7 @@ export async function getData(itemId: string) {
   return data;
 }
 
+//Server Action to get the bid data for a specific bidData
 export async function getBidData(itemId: string) {
   const bidData = await prisma.bids.findMany({
     where: {
@@ -170,7 +176,7 @@ export async function getBidData(itemId: string) {
   return bidData;
 }
 
-
+//Server Action to update the profile
 export async function UpdateProfile(prevState: any, formData: FormData){
   const {getUser} = getKindeServerSession()
   const user = await getUser()

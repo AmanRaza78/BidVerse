@@ -1,29 +1,35 @@
 import BidCard from "@/components/bid-card";
+import Pagination from "@/components/pagination";
 import SearchBar from "@/components/search-bar";
 import prisma from "@/lib/db";
 
 async function getData(searchParams: Record<string, string>) {
-  const {query} = searchParams
-  const filters: any = {}
+  const { page, query } = searchParams;
+  const filters: any = {};
 
-  if(query){
-    filters.OR=[
-      {name: {contains: query, mode:"insensitive"}}
-    ]
+  if (query) {
+    filters.OR = [{ name: { contains: query, mode: "insensitive" } }];
   }
-  const data = await prisma.auctionItem.findMany({
-    where: filters,
-    select: {
-      id: true,
-      name: true,
-      currentbid: true,
-      files: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-  return data;
+
+  const [count, data] = await prisma.$transaction([
+    prisma.auctionItem.count({
+      where: filters,
+    }),
+
+    prisma.auctionItem.findMany({
+      where: filters,
+      select: {
+        id: true,
+        name: true,
+        currentbid: true,
+        files: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+  ]);
+  return { count, data };
 }
 
 export default async function AllAuctionItemsPage({
@@ -31,7 +37,7 @@ export default async function AllAuctionItemsPage({
 }: {
   searchParams: { [key: string]: string };
 }) {
-  const data = await getData(searchParams);
+  const { count, data } = await getData(searchParams);
   return (
     <section className="max-w-7xl mx-auto px-4 md:px-8">
       <div className="pt-4">
@@ -47,6 +53,9 @@ export default async function AllAuctionItemsPage({
             files={item.files}
           />
         ))}
+      </div>
+      <div className="mb-20">
+        <Pagination totalPages={Math.ceil(count / 10)} />
       </div>
     </section>
   );
