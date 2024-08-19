@@ -27,6 +27,20 @@ const ItemSchema = z.object({
     .min(1, { message: "At least one image is required" }),
 });
 
+const updateProfileSchema = z.object({
+  firstname: z
+    .string()
+    .min(3, { message: "Minimum length of 3 required" })
+    .or(z.literal(""))
+    .optional(),
+
+  lastname: z
+    .string()
+    .min(3, { message: "Minimum length of 3 required" })
+    .or(z.literal(""))
+    .optional(),
+});
+
 export async function CreateItemAction(prevState: any, formData: FormData) {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
@@ -154,4 +168,46 @@ export async function getBidData(itemId: string) {
   });
 
   return bidData;
+}
+
+
+export async function UpdateProfile(prevState: any, formData: FormData){
+  const {getUser} = getKindeServerSession()
+  const user = await getUser()
+
+  if (!user) {
+    return redirect("/api/auth/login");
+  }
+
+  const parsedFields = updateProfileSchema.safeParse({
+    firstname: formData.get("firstname"),
+    lastname: formData.get("lastname")
+  })
+
+  if(!parsedFields.success){
+    const state: State = {
+      status: "error",
+      errors: parsedFields.error.flatten().fieldErrors,
+      message: "Oops, I think there is a mistake with your inputs."
+    }
+    return state
+  }
+
+  const data = await prisma.user.update({
+    where:{
+      id: user.id
+    },
+    data:{
+      firstname: parsedFields.data.firstname,
+      lastname: parsedFields.data.lastname
+    }
+  })
+
+  const state: State = {
+    status: "success",
+    message: "Your profile have been updated successfully"
+  }
+
+  return state
+
 }
