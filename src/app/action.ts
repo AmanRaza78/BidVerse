@@ -13,7 +13,6 @@ export type State = {
   message?: string | null;
 };
 
-
 // Schema for the auction Items
 const ItemSchema = z.object({
   name: z
@@ -57,7 +56,9 @@ export async function CreateItemAction(prevState: any, formData: FormData) {
     name: formData.get("name"),
     description: formData.get("description"),
     startingbid: Number(formData.get("startingbid")),
-    enddate: formData.get("enddate") ? new Date(formData.get("enddate") as string) : undefined,
+    enddate: formData.get("enddate")
+      ? new Date(formData.get("enddate") as string)
+      : undefined,
     files: JSON.parse(formData.get("files") as string),
   });
 
@@ -85,52 +86,52 @@ export async function CreateItemAction(prevState: any, formData: FormData) {
 }
 
 // Server Action which create the bid
-export async function CreateBid(formData:FormData){
-  const {getUser} = getKindeServerSession()
-  const user = await getUser()
+export async function CreateBid(formData: FormData) {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
 
-  if(!user){
-    return redirect("/api/auth/login")
+  if (!user) {
+    return redirect("/api/auth/login");
   }
 
-  const itemId = formData.get("itemId") as string
+  const itemId = formData.get("itemId") as string;
 
   const auctionData = await prisma.auctionItem.findFirst({
-    where:{
-      id: itemId
-    }
-  })
+    where: {
+      id: itemId,
+    },
+  });
 
-  if(!auctionData){
-    throw new Error("Auction Item is not found")
+  if (!auctionData) {
+    throw new Error("Auction Item is not found");
   }
-  
-  const latestBidValue = auctionData?.currentbid + auctionData?.bidinterval
+
+  const latestBidValue = auctionData?.currentbid + auctionData?.bidinterval;
 
   await prisma.bids.create({
-    data:{
+    data: {
       amount: latestBidValue,
       auctionItemId: itemId,
-      userId: user.id
-    }
-  })
+      userId: user.id,
+    },
+  });
 
   await prisma.auctionItem.update({
-    where:{
-      id: itemId
+    where: {
+      id: itemId,
     },
-    data:{
-      currentbid: latestBidValue
-    }
-  })
+    data: {
+      currentbid: latestBidValue,
+    },
+  });
 
   await prisma.notifications.create({
-    data:{
-      message:`${user.given_name} placed a bid of Rs.${latestBidValue} on ${auctionData.name}`,
-      userId: auctionData.userId
-    }
-  })
-  revalidatePath(`/auction/item/${itemId}`)
+    data: {
+      message: `${user.given_name} placed a bid of Rs.${latestBidValue} on ${auctionData.name}`,
+      userId: auctionData.userId,
+    },
+  });
+  revalidatePath(`/auction/item/${itemId}`);
 }
 
 // Server Action to get auction Item Data for a specific itemId
@@ -168,7 +169,7 @@ export async function getBidData(itemId: string) {
       createdAt: true,
       user: {
         select: {
-          profilepicture: true,
+          lastname: true,
           firstname: true,
         },
       },
@@ -183,9 +184,9 @@ export async function getBidData(itemId: string) {
 }
 
 //Server Action to update the profile
-export async function UpdateProfile(prevState: any, formData: FormData){
-  const {getUser} = getKindeServerSession()
-  const user = await getUser()
+export async function UpdateProfile(prevState: any, formData: FormData) {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
 
   if (!user) {
     return redirect("/api/auth/login");
@@ -193,33 +194,54 @@ export async function UpdateProfile(prevState: any, formData: FormData){
 
   const parsedFields = updateProfileSchema.safeParse({
     firstname: formData.get("firstname"),
-    lastname: formData.get("lastname")
-  })
+    lastname: formData.get("lastname"),
+  });
 
-  if(!parsedFields.success){
+  if (!parsedFields.success) {
     const state: State = {
       status: "error",
       errors: parsedFields.error.flatten().fieldErrors,
-      message: "Oops, I think there is a mistake with your inputs."
-    }
-    return state
+      message: "Oops, I think there is a mistake with your inputs.",
+    };
+    return state;
   }
 
   const data = await prisma.user.update({
-    where:{
-      id: user.id
+    where: {
+      id: user.id,
     },
-    data:{
+    data: {
       firstname: parsedFields.data.firstname,
-      lastname: parsedFields.data.lastname
-    }
-  })
+      lastname: parsedFields.data.lastname,
+    },
+  });
 
   const state: State = {
     status: "success",
-    message: "Your profile have been updated successfully"
+    message: "Your profile have been updated successfully",
+  };
+
+  return state;
+}
+
+export async function UpdateIsRead(formData: FormData) {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+
+  if (!user) {
+    return redirect("/api/auth/login");
   }
 
-  return state
+  const notificationId = formData.get("markread") as string;
 
+  await prisma.notifications.update({
+    where: {
+      id: notificationId,
+    },
+    data: {
+      isRead: true,
+    },
+  });
+
+  revalidatePath("/notifications");
 }

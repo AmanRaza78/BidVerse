@@ -46,6 +46,9 @@ export function UserNav({ email, name, userImage }: iAppProps) {
           <DropdownMenuItem asChild>
             <Link href="/profile">Profile</Link>
           </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/notifications">Notifications</Link>
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>

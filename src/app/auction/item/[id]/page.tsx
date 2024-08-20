@@ -142,7 +142,7 @@ export default async function ItemDetailPage({
                 <div className="flex gap-4">
                   <div>
                     <span>Rs.{bid.amount}</span> by{" "}
-                    <span className="font-bold">Mr.{bid.user?.firstname}</span>
+                    <span className="font-bold">Mr.{bid.user?.firstname} {bid.user?.lastname}</span>
                   </div>
                   <div>
                     {new Intl.DateTimeFormat("en-US", {
