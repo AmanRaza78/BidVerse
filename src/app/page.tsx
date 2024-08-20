@@ -3,8 +3,11 @@ import prisma from "@/lib/db";
 import Image from "next/image";
 import Link from "next/link";
 import { JSX, SVGProps } from "react";
+import { unstable_noStore as noStore } from "next/cache";
+
 
 async function getData(){
+  noStore()
   const data = await prisma.auctionItem.findMany({
     select:{
       id: true,

@@ -3,8 +3,11 @@ import { Card } from "@/components/ui/card"
 import prisma from "@/lib/db"
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server"
 import { redirect } from "next/navigation"
+import { unstable_noStore as noStore } from "next/cache";
+
 
 async function getUserData(userId: string){
+    noStore()
     const data = await prisma.user.findUnique({
         where:{
             id: userId

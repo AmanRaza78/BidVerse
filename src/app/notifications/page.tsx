@@ -11,7 +11,10 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { MessageCircleIcon } from "lucide-react";
 import Image from "next/image";
 import { redirect } from "next/navigation";
+import { unstable_noStore as noStore } from "next/cache";
+
 async function getNotifications() {
+  noStore()
   const data = await prisma.notifications.findMany({
     where: {
       isRead: false,

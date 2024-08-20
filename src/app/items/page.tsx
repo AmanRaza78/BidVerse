@@ -2,8 +2,10 @@ import BidCard from "@/components/bid-card";
 import Pagination from "@/components/pagination";
 import SearchBar from "@/components/search-bar";
 import prisma from "@/lib/db";
+import { unstable_noStore as noStore } from "next/cache";
 
 async function getData(searchParams: Record<string, string>) {
+  noStore()
   const { page, query } = searchParams;
   const filters: any = {};
 
