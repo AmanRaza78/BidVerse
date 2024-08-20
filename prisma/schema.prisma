@@ -27,6 +27,7 @@ model User {
   updatedAt   DateTime      @updatedAt
   auctionItem AuctionItem[]
   bids        Bids[]
+  notifications Notifications[]
 }
 
 model AuctionItem {
@@ -60,4 +61,14 @@ model Bids {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+
+model Notifications{
+  id String @id @default(uuid())
+  message String
+  isRead Boolean @default(false)
+  userId String?
+  user User? @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
 }

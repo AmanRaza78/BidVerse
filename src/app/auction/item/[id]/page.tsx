@@ -58,7 +58,7 @@ export default async function ItemDetailPage({
   // console.log(isBidOver(data), "hey aman data is here")
 
   return (
-    <section className="mx-auto px-4 lg:mt-10 max-w-7xl lg:px-8 lg:grid lg:grid-rows-1 lg:grid-cols-7 lg:gap-x-8 lg:gap-y-10 xl:gap-x-16">
+    <section className="mx-auto px-4 lg:mt-10 max-w-7xl lg:px-8 lg:grid lg:grid-rows-1 lg:grid-cols-7 lg:gap-x-8 lg:gap-y-10 xl:gap-x-16 mb-10">
       <Carousel className="lg:row-end-1 lg:col-span-4">
         <CarouselContent>
           {data?.files.map((item, index) => (
@@ -134,7 +134,7 @@ export default async function ItemDetailPage({
         </div>
       </div>
 
-      <div className="w-full max-w-2xl mx-auto mt-16 lg:max-w-none lg:mt-0 lg:col-span-4 overflow-auto">
+      <div className="w-full max-w-2xl mx-auto mt-16 lg:max-w-none lg:mt-0 lg:col-span-4 overflow-auto max-h-64">
         {hasBid ? (
           <ul className="space-y-4">
             {bidData.map((bid, index) => (

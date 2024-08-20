@@ -124,6 +124,12 @@ export async function CreateBid(formData:FormData){
     }
   })
 
+  await prisma.notifications.create({
+    data:{
+      message:`${user.given_name} placed a bid of Rs.${latestBidValue} on ${auctionData.name}`,
+      userId: auctionData.userId
+    }
+  })
   revalidatePath(`/auction/item/${itemId}`)
 }
 

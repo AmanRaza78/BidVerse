@@ -18,6 +18,8 @@ async function getData(searchParams: Record<string, string>) {
 
     prisma.auctionItem.findMany({
       where: filters,
+      take: 10,
+      skip: page ? (Number(page) - 1) * 10 : 0,
       select: {
         id: true,
         name: true,
@@ -54,7 +56,7 @@ export default async function AllAuctionItemsPage({
           />
         ))}
       </div>
-      <div className="mb-20">
+      <div className="mt-20">
         <Pagination totalPages={Math.ceil(count / 10)} />
       </div>
     </section>

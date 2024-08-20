@@ -10,7 +10,7 @@ interface BidCardProps {
 
 export default function BidCard({ name, currentbid, files, id }: BidCardProps) {
   return (
-    <div className="group grid gap-2 border rounded-md shadow-sm">
+    <div className="group grid gap-2 border rounded-md shadow-sm p-4">
       <img
         src={files[0]}
         alt="Auction Item"
@@ -23,7 +23,7 @@ export default function BidCard({ name, currentbid, files, id }: BidCardProps) {
         <p className="text-muted-foreground">
           Current Bid: <span className="font-semibold">{currentbid}</span>
         </p>
-        <Link href={`/auction/item/${id}`}>
+        <Link href={`/auction/item/${id}`} className="px-auto">
           <Button>Details</Button>
         </Link>
       </div>
