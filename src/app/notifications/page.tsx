@@ -7,8 +7,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import prisma from "@/lib/db";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { MessageCircleIcon } from "lucide-react";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 async function getNotifications() {
   const data = await prisma.notifications.findMany({
     where: {
@@ -28,6 +30,13 @@ async function getNotifications() {
 }
 
 export default async function Notifications() {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+
+  if (!user) {
+    return redirect("/api/auth/login");
+  }
+
   const data = await getNotifications();
   if (!data) {
     return (

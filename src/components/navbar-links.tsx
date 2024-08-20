@@ -20,11 +20,6 @@ export const navbarLinks = [
     name: "Create Auctions",
     href: "/auction/create",
   },
-  {
-    id: 3,
-    name: "Contact",
-    href: "/contact",
-  },
 ];
 
 export function NavbarLinks() {
